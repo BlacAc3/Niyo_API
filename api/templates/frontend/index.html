@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Page</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Frontend Page</h1>
+    </header>
+    <form id="register" method="POST" action="{% url 'register' %}">
+        <input type="text" class="formUser" name="username" placeholder="username">
+        <input type="password" class="formPass" name="password" placeholder="password">
+        <button type="submit">Register</button>
+    </form>
+
+    <form id="login" method="POST" >
+        <input type="text"  class="formUser" name="username" placeholder="username">
+        <input type="password" class="formPass" name="password" placeholder="password">
+        <button type="submit">Login</button>
+    </form>
+
+    <input type="text" placeholder="input" id="message-input">
+    <input type="text" placeholder="output" id="message-output">
+
+    
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", ()=>{
+            connectToWebSocket("ws://127.0.0.1:8000/ws/tasks/", "message-output", "message-input");
+
+            const loginForm = document.querySelector("#login")
+            
+            function loginFunction(event){
+                event.preventDefault(); // Prevent default form submission
+                var username = loginForm.querySelector(".formUser").value
+                var password = loginForm.querySelector(".formPass").value
+
+                var body = {
+                    "username":`${username}`, 
+                    "password":`${password}`
+                };
+                body = JSON.stringify(body) //important 
+                console.log(body)
+                fetch( "/login/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: body 
+                })
+                .then(response => response.json()) // Parse JSON response (optional)
+                .then(data => {
+                    console.log("Form submitted successfully:", data); // Handle successful response
+                    const accessToken = data.access;
+                    localStorage.setItem('accessToken', accessToken);
+                })
+                .catch(error => {
+                    console.error("Error submitting form:", error); // Handle errors
+                });
+            }
+
+            submitButton = loginForm.querySelector("button")
+            submitButton.addEventListener("click", loginFunction)
+        })
+
+        function connectToWebSocket(url, outputElementId, inputElementId) {
+            const outputElement = document.getElementById(outputElementId);
+            const inputElement = document.getElementById(inputElementId);
+            const token = localStorage.getItem("accessToken")
+            console.log(token)
+
+            if (!token) {
+                console.error("JWT access token not found in local storage.");
+                // Handle missing token (e.g., display an error message)
+                return;
+            }
+
+            if (!outputElement || !inputElement) {
+                console.error(`Elements with IDs "${outputElementId}" and "${inputElementId}" not found.`);
+                return;
+            }
+            
+
+
+            const ws = new WebSocket(url);
+
+            ws.onopen = function () {
+                console.log("WebSocket connection opened.");
+                ws.send(JSON.stringify({ type: "auth", token: token }));
+            };
+
+            ws.onmessage = function (event) {
+                const message = event.data;
+                outputElement.textContent = message;
+                console.log("Received message:", message);
+            };
+
+            ws.onerror = function (error) {
+                console.error("WebSocket error:", error);
+                outputElement.textContent = "Error: Connection failed.";
+            };
+
+            ws.onclose = function () {
+                console.log("WebSocket connection closed.");
+                outputElement.textContent = "Connection closed.";
+            };
+
+            inputElement.addEventListener("keyup", function (event) {
+                if (event.keyCode === 13) {  // Enter key pressed
+                const message = inputElement.value;
+                if (message) {
+                    ws.send(message);
+                    inputElement.value = "";  // Clear input field after sending
+                }
+                }
+            });
+
+        }
+    </script>       
+</body>
+</html>

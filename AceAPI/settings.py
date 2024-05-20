@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "api",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -72,11 +74,12 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'AceAPI.wsgi.application'
+ASGI_APPLICATION = "AceAPI.asgi.application"
+# WSGI_APPLICATION = "AceAPI.wsgi.application"
 
 
 #JWT Settings
-
+#-----------------------------------------------
 REST_FRAMEWORK = {
 'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
 'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),
@@ -94,8 +97,21 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-
-
+#Channels(WebSocket Settings)
+#-----------------------------------------------
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],
+#         },
+#     },
+# }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 
 # Database

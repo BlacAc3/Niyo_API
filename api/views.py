@@ -1,12 +1,18 @@
 from django.shortcuts import render, get_object_or_404
+#rest imports
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from .serializers import TaskSerializer, UserSerializer, TokenPairSerializer
+#websocket imports
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+#serializers
+from .serializers import TaskSerializer, UserSerializer
 from .models import Task
+
+def index(request):
+    return render(request, "frontend/index.html")
 
 
 # API views
@@ -60,16 +66,17 @@ class TaskRetrieveUpdateDestroy(APIView):
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-
     
+
 
 #Login and Registration Views
 class RegisterView(APIView):
     permission_classes=[AllowAny]
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == "POST":
+            serializer = UserSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
