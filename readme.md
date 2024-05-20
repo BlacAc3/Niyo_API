@@ -179,27 +179,73 @@ socket.onerror = function(error) {
 
 - **Task List and Create**: `GET` and `POST`
     ```
-    / (TaskListCreate)
+    /
     ```
 
 - **Task Retrieve, Update, and Destroy**: `GET`, `PUT`, `PATCH`, `DELETE`
     ```
-    /task/<str:pk>/ (TaskRetrieveUpdateDestroy)
+    /task/<str:pk>/
     ```
 
-- **Token Refresh**: `POST`
+- **4. Obtain JWT Token**
+
+    *URL:* `/login/`  
+    *Method:* `POST`  
+    *Description:* Obtain access and refresh JWT tokens.  
+    
+    *Request Body:*
+    
+    ```json
+    {
+        "username": "your_username",
+        "password": "your_password"
+    }
     ```
-    /token-refresh/ (TokenRefreshView)
+    
+    *Response:*
+    
+    ```json
+    {
+        "refresh": "<refresh_token>",
+        "access": "<access_token>"
+    }
     ```
 
-- **Login (Obtain JWT Token)**: `POST`
+- **5. Refresh JWT Token**
+    
+    *URL:* `/token-refresh/`  
+    *Method:* `POST`  
+    *Description:* Refresh the access JWT token using a refresh token.  
+    
+    *Request Body:*
+    
+    ```json
+    {
+        "refresh": "<refresh_token>"
+    }
     ```
-    /login/ (TokenObtainPairView)
+    
+    *Response:*
+    
+    ```json
+    {
+        "access": "<new_access_token>"
+    }
     ```
 
-- **Register**: `POST`
-    ```
-    /register/ (RegisterView)
+- **6. Register User**
+
+    *URL:* `/register/`  
+    *Method:* `POST`  
+    *Description:* Register a new user.  
+    
+    *Request Body:*
+    
+    ```json
+    {
+        "username": "your_username",
+        "password": "your_password"
+    }
     ```
 
 ### Example Request Headers
